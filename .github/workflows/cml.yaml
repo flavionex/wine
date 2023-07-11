@@ -29,4 +29,3 @@ jobs:
           cml-publish residuals.png --md >> report.md
           
           cml-send-comment report.md
-          #stoped at 11:54 from youtube video.
