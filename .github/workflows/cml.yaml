@@ -1,32 +1,32 @@
-name: model-wine-quality
-on: [push]
+# Workflow script
+name: cml_run
+
+env:
+  PYTHON_VERSION: 3.8
+
 jobs:
-  run:
+  build:
     runs-on: ubuntu-latest
-    # optionally use a convenient Ubuntu LTS + DVC + CML image
-    # container: ghcr.io/iterative/cml:0-dvc2-base1
+
     steps:
-      - uses: actions/checkout@v3
-      # may need to setup NodeJS & Python3 on e.g. self-hosted
-      # - uses: actions/setup-node@v3
-      #   with:
-      #     node-version: '16'
-      # - uses: actions/setup-python@v4
-      #   with:
-      #     python-version: '3.x'
-      - uses: iterative/setup-cml@v1
-      - name: cml_run
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
         run: |
-          # Your ML workflow goes here
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Execute ML workflow
+        run: |
           python train.py
-          
-          echo "## Model Metrics" >  report.md
-          cat metrics.txt >> report.md
-          
-          echo "## Data Viz" >> report.md
-          cml-publish feature_importance.png --md >> report.md
-          cml-publish residual.png --md >> report.md
-          
+
+      - name: Generate report
+        run: |
+          python generate_report.py
+
+      - name: Send report as a comment
+        run: |
           cml-send-comment report.md
-        
